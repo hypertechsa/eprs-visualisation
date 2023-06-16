@@ -100,7 +100,7 @@ let tooltip = d3
   .style("opacity", 0);  
 
 // Load and process data
-d3.csv("./data/mep-data.csv")
+d3.csv("data/mep-data.csv")
   .then(function (data) {
     let dataSet = data;
   
