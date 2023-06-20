@@ -1,0 +1,202 @@
+
+      body {
+        background-image: url("/data/EP-151968C_CUG_EG_004.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        margin: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      body > * {
+        flex-shrink: 0;
+      }
+      .centered {
+        display: flex;
+        background-color: white;
+        margin-top: 150px;
+        padding-left: 30px;
+      }
+
+      .graph {
+        /* padding-top: 49px; */
+      }
+
+      /* #checkboxes > * {
+            font-size: 14px;
+            display: inline;
+            padding-top: 3px;
+        } */
+
+      h2 {
+        padding-top: 34px;
+        font-size: 21px;
+        font-weight: 600;
+      }
+
+      .measure-group {
+        display: flex;
+        padding-top: 22px;
+        padding-bottom: 49px;
+      }
+      .stateButtons {
+        width: 80%;
+      }
+
+      .selectedButton {
+        text-align: right;
+        width: 20%;
+      }
+
+      input,
+      p {
+        display: inline-block;
+        vertical-align: middle;
+        margin: 5px;
+      }
+
+      .scale-group {
+        /* padding-left: 40px; */
+        display: inline;
+      }
+
+      button {
+        /* margin:0 auto; */
+        display: block;
+      }
+
+      .measure,
+      .scale {
+      }
+
+      svg {
+        background-color: white;
+      }
+
+      .cells path {
+        fill: none;
+        pointer-events: all;
+      }
+      .form-select {
+        width: max-content;
+      }
+      button {
+        height: auto;
+      }
+      div.tooltip {
+        width: auto;
+        position: absolute;
+        text-align: left;
+        color: black;
+        font-size: 14px;
+        background-color: #fffcf8;
+        pointer-events: none;
+        cursor: none;
+        .red-line {
+          background-color: red;
+        }
+        .name {
+          height: 30px;
+        }
+        .elected {
+          height: 30px;
+        }
+        .party {
+          height: 30px;
+        }
+        .age {
+          height: 30px;
+        }
+        .container {
+          padding: 10px;
+        }
+      }
+      .right {
+        text-align: left;
+        padding-top: 27px;
+        margin-left: 60px;
+        margin-right: 77px;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: rgb(96, 125, 139);
+        shape-rendering: crispEdges;
+      }
+      .axis path {
+        display: none;
+      }
+
+      .axis text {
+        font: 10px sans-serif;
+      }
+
+      .continent {
+      }
+      .highlight {
+        padding: 0.25em;
+        background: #ffc107;
+      }
+      .question {
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .description {
+        font-size: 16px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .seperator {
+        width: 100%;
+        padding-left: 33px;
+        padding-right: 77px;
+        background-color: white;
+      }
+
+      .line {
+        width: 100%;
+        height: 2px;
+        background-color: #1a438f;
+      }
+      .footer {
+        bottom: 0;
+        padding-top: 24px;
+        padding-left: 33px;
+        padding-right: 77px;
+        display: flex;
+        width: 100%;
+        background-color: white;
+        flex-grow: 1;
+      }
+
+      .copyright {
+        width: 75%;
+        padding-right: 20px;
+      }
+      .photos {
+        text-align: center;
+        width: 25%;
+        padding-left: 30px;
+      }
+      .photos img {
+        padding: 25px;
+      }
+      /* .legend {
+            fill: rgba(0,0,0,.87);
+        }
+
+        .article {
+            position: fixed;
+            top: 20px;
+            left: 15px;
+            font-size: 35px;
+            color: rgb(96,125,139);
+        }
+
+        .article-tt {
+            font-size: 14px;
+            background: rgb(96,125,139);
+            border: 1px solid rgb(96,125,139);
+            border-radius: 2px;
+            pointer-events: none;
+        } */
