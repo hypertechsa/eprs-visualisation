@@ -95,8 +95,9 @@ let tooltip2 = d3
 d3.csv("data/mep-data.csv")
   .then(function (data) {
     let dataSet = data;
+    let allcountries = [...new Set(dataSet.map((d) => d.country))];
     initialize();
-    redraw();
+    //redraw();
 
     // Listen to click on "total" and "per capita" buttons and trigger redraw when they are clicked
     d3.selectAll(".measure").on("click", function () {
@@ -115,6 +116,34 @@ d3.csv("data/mep-data.csv")
     d3.selectAll("select").on("change", filter);
 
     function initialize() {
+      xScale = d3.scaleLinear().range([margin.left+50, width - margin.right-50]);
+      yScale = d3.scalePoint().range([height-margin.bottom, margin.top+50]);
+      xScale.domain(
+        d3.extent(dataSet, function (d) {
+          return +d["age"];
+        })
+      );
+
+      let xAxis;
+      let yAxis;
+      //  Set X axis based on new scale.
+
+      yScale.domain(["All"]);
+
+      xAxis = d3.axisTop(xScale).ticks(10, ".1f").tickSizeOuter(0);
+      yAxis = d3.axisLeft(yScale).ticks(10, ".1f").tickSize(width-margin.right).tickSizeOuter(0);
+      d3.transition(svg)
+        .select(".x.axis")
+        .transition()
+        .duration(1000)
+        .call(xAxis);
+      
+        d3.transition(svg)
+        .select(".y.axis")
+        .transition()
+        .duration(1000)
+        .call(yAxis)
+        //.attr("transform", "translate(" + (margin.left+10 ) + ",0)");
       // Create simulation with specified dataset
       let simulation = d3
         .forceSimulation(dataSet)
@@ -123,13 +152,12 @@ d3.csv("data/mep-data.csv")
           "x",
           d3
             .forceX(function (d) {
-              // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
+                     // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
               return xScale(+d["age"] ); // This is the desired position
             })
-            .strength(2)
         ) // Increase velocity
-        .force("y", d3.forceY(height / 2 - margin.bottom / 2  )) // // Apply positioning force to push nodes towards center along Y axis
-        //.force("collide", d3.forceCollide(8)) // Apply collision force with radius of 8 - keeps nodes centers 8 pixels apart
+        .force("y", d3.forceY(yScale("All"))) // // Apply positioning force to push nodes towards center along Y axis
+        .force("collide", d3.forceCollide(5)) // Apply collision force with radius of 8 - keeps nodes centers 8 pixels apart
         .stop(); // Stop simulation from starting automatically
 
       // Manually run simulation
@@ -166,69 +194,106 @@ d3.csv("data/mep-data.csv")
         .attr("cy", function (d) {
           return d.y;
         });
+
+
+        d3.selectAll(".countries")
+          .on("mousemove", function (d) {
+            tooltip
+              .html(
+                `
+                  <div style="height:4px;width:100%;" class="red-line"></div>
+                  <div class="container">
+                  <div class="name"><h2>${d["mep_honorific_prefix"]} ${d["mep_given_name"]} ${d["mep_family_name"]}</h2></div><hr/>
+                  <div style="display:flex;" class="elected">
+                    <div style="text-align: left;width:50%;"><h5>Elected by</h5></div>
+                    <div style="text-align: right;width:50%;"><h5><strong>${d["country"]}</strong></h5></div>
+                  </div><hr/>
+                <div style="display:flex;" class="party">
+                  <div style="text-align: left;width:50%;"><h5>Party</h5></div>
+                  <div style="text-align: right;width:50%;"><h5><strong>${d["political_group_abb"]}</strong></h5></div>
+                </div><hr/>
+                <div style="display:flex;" class="age">
+                  <div style="text-align: left;width:50%;"><h5>Age</h5></div>
+                  <div style="text-align: right;width:50%;"><h5><strong>${d["age"]}</strong></h5></div>
+                </div><hr/>
+                </div>`
+              )
+              .style("top", d3.event.pageY - 12 + "px")
+              .style("left", d3.event.pageX + 25 + "px")
+              .style("opacity", 1);
+
+            
+          })
+          .on("mouseout", function (_) {
+            tooltip.style("opacity", 0);
+            xLine.attr("opacity", 0);
+          });
     }
 
     function redraw() {
+      let countries = [...new Set(dataSet.map((d) => d.country))];
       if (chartState.measure == Count.total) {
         xScale = d3.scaleLinear().range([margin.left+50, width - margin.right-50]);
-        yScale = d3.scalePoint().range([height-margin.bottom, margin.top+50]);
-        xScale.domain(
-          d3.extent(dataSet, function (d) {
-            return +d["age"];
-          })
-        );
+      yScale = d3.scalePoint().range([height-margin.bottom, margin.top+50]);
+      xScale.domain(
+        d3.extent(dataSet, function (d) {
+          return +d["age"];
+        })
+      );
 
-        let xAxis;
-        let yAxis;
-        //  Set X axis based on new scale.
+      let xAxis;
+      let yAxis;
+      //  Set X axis based on new scale.
 
-        yScale.domain(['All']);
+      yScale.domain(["All"]);
 
-        xAxis = d3.axisTop(xScale).tickSizeOuter(0);
-        yAxis = d3.axisLeft(yScale).tickSize(width-margin.right).tickSizeOuter(0);
+      xAxis = d3.axisTop(xScale).ticks(10, ".1f").tickSizeOuter(0);
+      yAxis = d3.axisLeft(yScale).ticks(10, ".1f").tickSize(width-margin.right).tickSizeOuter(0);
+      d3.transition(svg)
+        .select(".x.axis")
+        .transition()
+        .duration(1000)
+        .call(xAxis);
+      
         d3.transition(svg)
-          .select(".x.axis")
-          .transition()
-          .duration(1000)
-          .call(xAxis);
-        
-          d3.transition(svg)
-          .select(".y.axis")
-          .transition()
-          .duration(1000)
-          .call(yAxis)
-          //.attr("transform", "translate(" + (margin.left+10 ) + ",0)");
-
+        .select(".y.axis")
+        .transition()
+        .duration(1000)
+        .call(yAxis)
         // Create simulation with specified dataset
         let simulation = d3
-          .forceSimulation(dataSet)
-          //  Apply positioning force to push nodes towards desired position along X axis
-          .force(
+          .forceSimulation(data)
+                        //  Apply positioning force to push nodes towards desired position along X axis
+          .force(      // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
             "x",
             d3.forceX(function (d) {
-              // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
-              return xScale(+d["age"]); // This is the desired position
+              if(countries.length>0){
+              if(countries.includes(d.country))
+              return xScale(+d["age"]);
+              else
+              return xScale(0);}
+              else
+              return xScale(0)
             })
           )
+
           // Increase velocity
-          .force("y", d3.forceY(height / 2 + margin.bottom/2 )) // // Apply positioning force to push nodes towards center along Y axis
+          .force("y", d3.forceY(yScale("All") )) // // Apply positioning force to push nodes towards center along Y axis
           .force("collide", d3.forceCollide(5)) // Apply collision force with radius of 8 - keeps nodes centers 8 pixels apart
           .stop(); // Stop simulation from starting automatically
 
         // Manually run simulation
-        for (let i = 0; i < dataSet.length; ++i) {
+        for (let i = 0; i < data.length; ++i) {
           simulation.tick();
         }
+       
 
         // Create country circles
-        let countriesCircles = svg
+         countriesCircles = svg
           .selectAll(".countries")
-          .data(dataSet, function (d) {
-            return d.country;
-          });
-
-        countriesCircles
-          .exit()
+          
+        if(countries.length>0){
+          countriesCircles
           .transition()
           .duration(2000)
           .attr("cx", function (d) {
@@ -236,7 +301,16 @@ d3.csv("data/mep-data.csv")
           })
           .attr("cy", function (d) {
             return d.y;
-          });
+          });}
+          else{countriesCircles
+            .transition()
+            .duration(2000)
+            .attr("cx", 0)
+            .attr("cy", function (d) {
+              return d.y;
+            });}  
+
+        
 
         // Show tooltip when hovering over circle (data for respective country)
         d3.selectAll(".countries")
@@ -281,7 +355,7 @@ d3.csv("data/mep-data.csv")
             return +d["age"];
           })
         );
-        let countries = [...new Set(dataSet.map((d) => d.country))];
+        
         yScale.domain(countries);
 
         let xAxis;
@@ -306,21 +380,34 @@ d3.csv("data/mep-data.csv")
 
         // Create simulation with specified dataset
         let simulation = d3
-          .forceSimulation(dataSet)
+          .forceSimulation(data)
           // Apply positioning force to push nodes towards desired position along X axis
 
           .force(
             "x",
             d3.forceX(function (d) {
-              // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
-              return xScale(+d["age"]); // This is the desired position
+              if(countries.length>0){
+                if(countries.includes(d.country))
+                return xScale(+d["age"]);
+                else
+                return xScale(0);}
+                else
+                return xScale(0) // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
+               // This is the desired position
             })
           )
           //.force("collide", d3.forceCollide(8)) // Increase velocity
           .force(
             "y",
-            d3.forceY(function (d, index) {
-              return yScale(d["country"]); // This is the desired position
+            d3.forceY(function (d) {
+              if(countries.length>0){
+              if(countries.includes(d.country))
+              return yScale(d["country"]);
+              else
+              return 0;
+              }
+              return 0;
+              // This is the desired position
             })
           )
           .force("collide", d3.forceCollide(4)) // // Apply positioning force to push nodes towards center along Y axis
@@ -328,29 +415,35 @@ d3.csv("data/mep-data.csv")
           .stop(); // Stop simulation from starting automatically
 
         // Manually run simulation
-        for (let i = 0; i < dataSet.length; ++i) {
+        for (let i = 0; i < data.length; ++i) {
           simulation.tick();
           
         }
         ;
         // Create country circles
-        let countriesCircles = svg
+        countriesCircles = svg
           .selectAll(".countries")
-          .data(dataSet, function (d) {
-            return d["country"];
-          });
+          
 
-        countriesCircles
-          .exit()
-          .transition()
-          .duration(2000)
-          .attr("cx", function (d) {
-            return d.x;
-          })
-          .attr("cy", function (d) {
-            
+          
+
+          if(countries.length>0){
+            countriesCircles
+            .transition()
+            .duration(2000)
+            .attr("cx", function (d) {
+              return d.x;
+            })
+            .attr("cy", function (d) {
               return d.y;
-          });
+            });}
+            else{countriesCircles
+              .transition()
+              .duration(2000)
+              .attr("cx", 0)
+              .attr("cy", function (d) {
+                return d.y;
+              });}  
           
           
         // Show tooltip when hovering over circle (data for respective country)
@@ -394,7 +487,6 @@ d3.csv("data/mep-data.csv")
     // Filter data based on which checkboxes are ticked
 
     function filter() {
-      console.log("eimai sto filter")
       function getCheckedBoxes(checkboxName) {
         
         let checkboxes = d3.selectAll(checkboxName).nodes();
@@ -414,7 +506,7 @@ d3.csv("data/mep-data.csv")
       let newData = [];
 
       if (checkedBoxes == null) {
-        console.log("eimai emptyyyy")
+       
         dataSet = newData;
         redraw();
         return;
@@ -422,7 +514,6 @@ d3.csv("data/mep-data.csv")
 
       for (let i = 0; i < checkedBoxes.length; i++) {
         let newArray = data.filter(function (d) {
-          console.log(checkedBoxes[i])
           return d.country === checkedBoxes[i];
         });
         Array.prototype.push.apply(newData, newArray);
