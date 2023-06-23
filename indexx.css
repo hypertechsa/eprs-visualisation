@@ -39,6 +39,9 @@
         padding-top: 22px;
         padding-bottom: 49px;
       }
+      .bootst {
+        display: none;
+      }
       .stateButtons {
         width: 80%;
       }
