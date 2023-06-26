@@ -1,5 +1,5 @@
-let height = 500;
-let width = 1300;
+let height = 480;
+let width = parseInt(d3.select('#svganchor').style('width'), 10);
 let margin = { top: 10, right: 40, bottom: 34, left: 40 };
 
 
@@ -51,7 +51,7 @@ let svg = d3
   .select("#svganchor")
   .append("svg")
   .attr("width", width)
-  .attr("height", height)
+  .attr("height", height);
   
 
 let xScale = d3.scaleLinear().range([margin.left+50, width - margin.right-50]);
@@ -243,7 +243,7 @@ d3.csv("data/mep-data.csv")
         .append("circle")
         .attr("class", "countries")
         .attr("cx", 0)
-        .attr("cy", height / 2 - margin.bottom / 2)
+        .attr("cy",yScale("All"))
         .attr("r", 3)
         .attr("fill", function (d) {
           return colors("europe");
@@ -298,14 +298,19 @@ d3.csv("data/mep-data.csv")
       
       let countries = [...new Set(dataSet.map((d) => d.country))];
       if (chartState.measure == Count.total) {
+        height=480;
+        let currentWidth = parseInt(d3.select('#svganchor').style('width'), 10);
+        svg.attr("height",height).attr("width",currentWidth)
+        // d3.select("svg").style("height",480)
         d3.select(".selectedButton").style("display","none")
-        xScale = d3.scaleLinear().range([margin.left+50, width - margin.right-50]);
-      yScale = d3.scalePoint().range([height-margin.bottom, margin.top+50]);
-      xScale.domain(
+        xScale = d3.scaleLinear().range([margin.left+50, currentWidth - margin.right-50]);
+        yScale = d3.scalePoint().range([height-margin.bottom, margin.top+50]);
+      
+        xScale.domain(
         d3.extent(data, function (d) {
           return +d["age"];
         })
-      );
+        );
 
       let xAxis;
       let yAxis;
@@ -365,8 +370,8 @@ d3.csv("data/mep-data.csv")
         },
       ]
 
-      xAxis = d3.axisTop(xScale).tickSizeOuter(0);
-      yAxis = d3.axisLeft(yScale).tickSize(width-margin.right).tickSizeOuter(0);
+      xAxis = d3.axisTop(xScale);
+      yAxis = d3.axisLeft(yScale).tickSize(width-margin.right);
       d3.transition(svg)
         .select(".x.axis")
         .transition()
@@ -381,11 +386,12 @@ d3.csv("data/mep-data.csv")
 
         var makeAnnotations = d3.annotation()
         .annotations(centerAnnotation)
-
+        d3.selectAll(".annotation-group").remove();
       d3.select("svg")
       .append("g")
       .attr("class", "annotation-group")
-      .call(makeAnnotations)      
+      .call(makeAnnotations)    
+
         // Create simulation with specified dataset
         let simulation = d3
           .forceSimulation(data)
@@ -414,7 +420,7 @@ d3.csv("data/mep-data.csv")
          countriesCircles = svg
           .selectAll(".countries")
           
-        if(countries.length>0){
+        
           countriesCircles
           .transition()
           .duration(2000)
@@ -423,14 +429,7 @@ d3.csv("data/mep-data.csv")
           })
           .attr("cy", function (d) {
             return d.y;
-          });}
-          else{countriesCircles
-            .transition()
-            .duration(2000)
-            .attr("cx", 0)
-            .attr("cy", function (d) {
-              return d.y;
-            });}  
+          }); 
 
         
 
@@ -470,7 +469,13 @@ d3.csv("data/mep-data.csv")
       }
 
       if (chartState.measure === Count.perCap) {
+        height=countries.length*40
+        let currentWidth = parseInt(d3.select('#svganchor').style('width'), 10);
+        svg.attr("height",height).attr("width",currentWidth)
+        // d3.select("svg").style("height",countries.length*50)
+        
         d3.select(".selectedButton").style("display",null)
+        xScale = d3.scaleLinear().range([margin.left+50, currentWidth - margin.right-50]);
         yScale = d3.scalePoint().range([height-margin.bottom, margin.top+50]);
         xScale.domain(
           d3.extent(dataSet, function (d) {
@@ -607,6 +612,7 @@ d3.csv("data/mep-data.csv")
       }
     }
 
+    window.addEventListener('resize', redraw );  
     // Filter data based on which checkboxes are ticked
 
     function filter() {

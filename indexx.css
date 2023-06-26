@@ -1,25 +1,68 @@
 
       body {
-        background-image: url("data/EP-151968C_CUG_EG_004.png");
-        background-repeat: no-repeat;
-        background-size: cover;
+        
         margin: 0;
-        height: 100%;
+        height: 100vh;
         display: flex;
         flex-direction: column;
       }
       body > * {
         flex-shrink: 0;
       }
+      header{
+        background-image: url("data/EP-151968C_CUG_EG_004_header.png") ;
+        background-repeat: no-repeat;
+        background-size: cover;
+        box-shadow: inset 0 0 0 2000px rgba(0, 68, 148, 0.7);
+        position: relative;
+        min-height: 25vh;
+      }
+     
+      .ecl-tabs{
+        margin: 0;
+        width: 70%;
+        position: absolute;
+        bottom: 0;
+        margin-left: 5%;
+        .ecl-tabs__list{
+          padding: 0;
+         border: none;
+        }
+      }
+
+      .ecl-tabs__link{
+        border: none;
+        color: white;
+        background-color: transparent;
+        
+      } 
+      .ecl-tabs__link:hover{
+       
+        color: white;
+       
+        
+      } 
+      .ecl-tabs__link--active{
+        background-color: white;
+        border-top: solid 5px;
+        color: #004494;
+        border-top-color: #70F0D3;
+        &:hover{
+          color: #004494;
+        }
+        
+        
+      } 
+     
+     
       .centered {
+        margin: 2% 5% 2% 5%;
         display: flex;
         background-color: white;
-        margin-top: 150px;
-        padding-left: 30px;
       }
 
       .graph {
-        /* padding-top: 49px; */
+       max-height: 1100px;
       }
 
       /* #checkboxes > * {
@@ -28,12 +71,12 @@
             padding-top: 3px;
         } */
 
-      h2 {
-        padding-top: 34px;
+     
+      .title h2{
         font-size: 21px;
-        font-weight: 600;
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: bold;
       }
-
       .measure-group {
         display: flex;
         padding-top: 22px;
@@ -45,10 +88,55 @@
       .stateButtons {
         width: 80%;
       }
+      .btn-check:checked+.btn-outline-primary{
+        background-color: #004494;
+        border-color:#004494 ;
+        font-size: 13px;
+        font-weight: bold;
+        font-family: Arial, Helvetica, sans-serif;
+       padding-top: 2px;
+        width: 155px;
+        height: 25px;
+
+      }
+      .btn-check:hover+.btn-outline-primary{
+        background-color: #004494;
+        border-color:#004494 ;
+      }
+      .btn-outline-primary{
+        color: #404040;
+        border-color:#404040 ;
+        font-size: 13px;
+        font-family: Arial, Helvetica, sans-serif;
+        padding-top: 2px;
+        width: 155px;
+        height: 25px;
+      }
+      .stateButtons p {
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
 
       .selectedButton {
         text-align: right;
         width: 20%;
+      }
+      .dropdown-toggle{
+        height: 25px;
+        width: 173px;
+        padding-top: 2px;
+        font-size: 13px;
+        background-color: #fff;
+        border-color: #404040;
+        font-family: Arial, Helvetica, sans-serif;
+         .filter-option-inner{
+          color:#404040
+         }
+      }
+      .inner{
+        max-height: 200px;
+        font-size: 13px;
+        font-family: Arial, Helvetica, sans-serif;
       }
 
       input,
@@ -88,6 +176,7 @@
       }
       div.tooltip {
         width: auto;
+        min-width: 350px;
         position: absolute;
         text-align: left;
         color: black;
@@ -116,10 +205,16 @@
       }
       .right {
         text-align: left;
-        padding-top: 27px;
-        margin-left: 60px;
-        margin-right: 77px;
+        width: 30%;
+        
       }
+      .left{
+        margin-right:2%;
+        height: 100%;
+        width: 70%;
+
+      }
+      
       .axis path,
       .axis line {
         fill: none;
@@ -138,14 +233,15 @@
       }
       .highlight {
         padding: 0.25em;
-        background: #ffc107;
+        background: #FFD617;
+        font-size: 14;
       }
       .question {
         font-size: 12px;
         font-family: Arial, Helvetica, sans-serif;
       }
       .description {
-        font-size: 16px;
+        font-size: 14px;
         font-family: Arial, Helvetica, sans-serif;
       }
 
@@ -184,6 +280,7 @@
       .photos img {
         padding: 25px;
       }
+      
       /* .legend {
             fill: rgba(0,0,0,.87);
         }
