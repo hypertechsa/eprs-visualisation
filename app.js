@@ -133,7 +133,7 @@ d3.csv("data/mep-data.csv")
     yScale = d3.scalePoint().range([height - margin.bottom, margin.top + 50]);
     xScale.domain([20, 90]);
     yScale.domain(["All"]);
-    const centerAnnotation = [
+    let centerAnnotation = [
       {
         note: {
           label:
@@ -355,6 +355,61 @@ d3.csv("data/mep-data.csv")
 
         xScale.domain([20, 90]);
         yScale.domain(["All"]);
+        centerAnnotation = [
+          {
+            note: {
+              label:
+                "The majority of MEPs are aged between 41 and 60 years old. The average MEP age is 52 years old.",
+              wrap: 250,
+              padding: 10,
+            },
+            type: d3.annotationXYThreshold,
+            color: ["#707070"],
+            x: xScale(44),
+            y: yScale("All") + 100,
+            dy: 50,
+            dx: 0,
+            subject: {
+              x1: xScale(41),
+              x2: xScale(60),
+              tick: annotationTicksStart
+                .attr("x1", xScale(41))
+                .attr("y1", yScale("All") + 100)
+                .attr("x2", xScale(41))
+                .attr("y2", yScale("All") + 100 - 6),
+              tick2: annotationTicksEnd
+                .attr("x1", xScale(60))
+                .attr("y1", yScale("All") + 100)
+                .attr("x2", xScale(60))
+                .attr("y2", yScale("All") + 100 - 6),
+            },
+          },
+          {
+            note: {
+              label: `The youngest MEP is  ${minAge} years old.`,
+              wrap: 150,
+              padding: 10,
+            },
+            type: d3.annotationCallout,
+    
+            x: xScale(25),
+            y: yScale("All") + 20,
+            dy: 130,
+            dx: 0,
+          },
+          {
+            note: {
+              label: `The oldest MEP is ${maxAge} years old`,
+              wrap: 150,
+              padding: 10,
+            },
+            type: d3.annotationCallout,
+            x: xScale(83),
+            y: yScale("All") + 20,
+            dy: 130,
+            dx: 0,
+          },
+        ];
         let xAxis;
         let yAxis;
 
@@ -425,8 +480,10 @@ d3.csv("data/mep-data.csv")
           .attr("cy", function (d) {
             return d.y;
           });
-      }
 
+          
+      }
+      
       if (chartState.measure === Count.perCap) {
         height = countries.length * 40;
         let currentWidth = parseInt(d3.select("#svganchor").style("width"), 10);
@@ -510,6 +567,18 @@ d3.csv("data/mep-data.csv")
           countriesCircles
             .transition()
             .duration(2000)
+            .attr("fill",function (d, index) {
+              if(index===0){
+                return "#25891A"
+              }
+              else if (index === data.length-1)
+              {
+                return "#0E47CB";
+            }
+            else {
+              return "#BCBCBC"
+            }
+            })
             .attr("cx", function (d) {
               return d.x;
             })
@@ -522,9 +591,11 @@ d3.csv("data/mep-data.csv")
             .duration(2000)
             .attr("cx", 0)
             .attr("cy", function (d) {
+              
               return d.y;
             });
         }
+       
       }
     }
 
