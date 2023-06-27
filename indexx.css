@@ -176,18 +176,18 @@
       }
       div.tooltip {
         width: auto;
-        min-width: 350px;
+        min-width: 250px;
         position: absolute;
         text-align: left;
         color: black;
-        font-size: 14px;
+        font-size: 12px;
         background-color: #fffcf8;
         pointer-events: none;
         cursor: none;
-        .red-line {
-          background-color: red;
-        }
-        .name {
+        
+
+       
+        /* .name {
           height: 30px;
         }
         .elected {
@@ -198,11 +198,26 @@
         }
         .age {
           height: 30px;
-        }
+        } */
         .container {
           padding: 10px;
         }
       }
+      .countries:hover{
+        fill: #004494;
+      }
+      .countries{
+        z-index: 3;
+      }
+
+      .annotation-group{
+        z-index: 0;
+      }
+
+      hr{
+        margin: 2px;
+      }
+
       .right {
         text-align: left;
         width: 30%;
@@ -272,13 +287,13 @@
         width: 75%;
         padding-right: 20px;
       }
-      .photos {
-        text-align: center;
-        width: 25%;
-        padding-left: 30px;
-      }
+      
       .photos img {
         padding: 25px;
+      }
+
+      .annotation-note path{
+        display: none;
       }
       
       /* .legend {

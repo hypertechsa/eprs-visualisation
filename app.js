@@ -1,7 +1,6 @@
 let height = 480;
-let width = parseInt(d3.select('#svganchor').style('width'), 10);
+let width = parseInt(d3.select("#svganchor").style("width"), 10);
 let margin = { top: 10, right: 40, bottom: 34, left: 40 };
-
 
 // Data structure describing chart scales
 let Scales = {
@@ -40,6 +39,22 @@ let colors = d3
   ])
   .range(["#D81B60", "#1976D2", "#388E3C", "#BCBCBC", "#E64A19", "#455A64"]);
 
+let parties = d3
+  .scaleOrdinal()
+  .domain(["S&D", "EPP", "NI", "GUE/NGL", "Renew", "Greens-EFA", "ECR", "ID"])
+  .range([
+    "#f0001b",
+    "#3399fe",
+    "#c3c3c3",
+    "#b71c1c",
+    "#ffd601",
+    "#56b45f",
+    "#196ba8",
+    "#154288",
+  ]);
+
+
+
 d3.select("#asiaColor").style("color", colors("asia"));
 d3.select("#africaColor").style("color", colors("africa"));
 d3.select("#northAmericaColor").style("color", colors("northAmerica"));
@@ -52,20 +67,25 @@ let svg = d3
   .append("svg")
   .attr("width", width)
   .attr("height", height);
-  
 
-let xScale = d3.scaleLinear().range([margin.left+50, width - margin.right-50]);
+let xScale = d3
+  .scaleLinear()
+  .range([margin.left + 50, width - margin.right - 50]);
 let yScale = d3.scalePoint();
 
 svg
   .append("g")
   .attr("class", "x axis")
-  .attr("transform", "translate(0," + (margin.top+10) + ")");
+  .attr("transform", "translate(0," + (margin.top + 10) + ")");
 
 svg
   .append("g")
   .attr("class", "y axis")
-  .attr("transform", "translate(" + (width) + ",0)");
+  .attr("transform", "translate(" + width + ",0)");
+
+let annotationTicksStart = svg.append("line").attr("stroke", "#707070");
+
+let annotationTicksEnd = svg.append("line").attr("stroke", "#707070");
 
 // Create line that connects circle and X,Y axis
 let xLine = svg
@@ -95,8 +115,121 @@ let tooltip2 = d3
 d3.csv("data/mep-data.csv")
   .then(function (data) {
     let dataSet = data;
-    let allcountries = [...new Set(dataSet.map((d) => d.country))];
+    let minAge = d3.min(
+      d3.extent(data, function (d) {
+        return +d.age;
+      })
+    );
+
+    let maxAge = d3.max(
+      d3.extent(data, function (d) {
+        return +d.age;
+      })
+    );
+    let currentWidth = parseInt(d3.select("#svganchor").style("width"), 10);
+    xScale = d3
+      .scaleLinear()
+      .range([margin.left + 50, currentWidth - margin.right - 50]);
+    yScale = d3.scalePoint().range([height - margin.bottom, margin.top + 50]);
+    xScale.domain([20, 90]);
+    yScale.domain(["All"]);
+    const centerAnnotation = [
+      {
+        note: {
+          label:
+            "The majority of MEPs are aged between 41 and 60 years old. The average MEP age is 52 years old.",
+          wrap: 250,
+          padding: 10,
+        },
+        type: d3.annotationXYThreshold,
+        color: ["#707070"],
+        x: xScale(44),
+        y: yScale("All") + 100,
+        dy: 50,
+        dx: 0,
+        subject: {
+          x1: xScale(41),
+          x2: xScale(60),
+          tick: annotationTicksStart
+            .attr("x1", xScale(41))
+            .attr("y1", yScale("All") + 100)
+            .attr("x2", xScale(41))
+            .attr("y2", yScale("All") + 100 - 6),
+          tick2: annotationTicksEnd
+            .attr("x1", xScale(60))
+            .attr("y1", yScale("All") + 100)
+            .attr("x2", xScale(60))
+            .attr("y2", yScale("All") + 100 - 6),
+        },
+      },
+      {
+        note: {
+          label: `The youngest MEP is  ${minAge} years old.`,
+          wrap: 150,
+          padding: 10,
+        },
+        type: d3.annotationCallout,
+
+        x: xScale(25),
+        y: yScale("All") + 20,
+        dy: 130,
+        dx: 0,
+      },
+      {
+        note: {
+          label: `The oldest MEP is ${maxAge} years old`,
+          wrap: 150,
+          padding: 10,
+        },
+        type: d3.annotationCallout,
+        x: xScale(83),
+        y: yScale("All") + 20,
+        dy: 130,
+        dx: 0,
+      },
+    ];
+    
     initialize();
+    d3.selectAll(".countries")
+      .on("mousemove", function (d) {
+        tooltip
+          .html(
+            `
+              <div style="height:4px;width:100%;background-color: ${parties(
+                d["political_group_abb"]
+              )};" class="red-line"></div>
+              <div class="container">
+              <div class="name"><strong>${d["mep_honorific_prefix"]} ${
+              d["mep_given_name"]
+            } ${d["mep_family_name"]}</strong></div><hr/>
+              <div style="display:flex;" class="elected">
+                <div style="text-align: left;width:50%;">Elected by</div>
+                <div style="text-align: right;width:50%;"><strong>${
+                  d["country"]
+                }</strong></div>
+              </div><hr/>
+            <div style="display:flex;" class="party">
+              <div style="text-align: left;width:50%;">Party</div>
+              <div style="text-align: right;width:50%;"><strong>${
+                d["political_group_abb"]
+              }</strong></div>
+            </div><hr/>
+            <div style="display:flex;" class="age">
+              <div style="text-align: left;width:50%;">Age</div>
+              <div style="text-align: right;width:50%;"><strong>${
+                d["age"]
+              }</strong></div>
+            </div><hr/>
+            </div>`
+          )
+          .style("top", d3.event.pageY - 12 + "px")
+          .style("left", d3.event.pageX + 25 + "px")
+          .style("opacity", 1);
+      })
+      .on("mouseout", function (_) {
+        tooltip.style("opacity", 0);
+        xLine.attr("opacity", 0);
+      });
     //redraw();
 
     // Listen to click on "total" and "per capita" buttons and trigger redraw when they are clicked
@@ -113,112 +246,50 @@ d3.csv("data/mep-data.csv")
     });
 
     // Trigger filter function whenever checkbox is ticked/unticked
-   
+
     d3.selectAll("select").on("change", filter);
-    
-    
-    
-    
 
     function initialize() {
-      d3.select(".selectedButton").style("display","none")
-      xScale = d3.scaleLinear().range([margin.left+50, width - margin.right-50]);
-      yScale = d3.scalePoint().range([height-margin.bottom, margin.top+50]);
-      xScale.domain(
-        d3.extent(dataSet, function (d) {
-          return +d["age"];
-        })
-      );
-      
+      d3.select(".selectedButton").style("display", "none");
+
       let xAxis;
       let yAxis;
       //  Set X axis based on new scale.
-      
-      yScale.domain(["All"]);
-      const centerAnnotation = [
-        {
-          note: {
-            label: "The majority of MEPs are aged between 41 and 60 years old. The average MEP age is 52 years old."
-          },
-          type: d3.annotationCalloutCircle,
-          subject: {
-            radius: 180,         // circle radius
-            radiusPadding: 30   // white space around circle befor connector
-          },
-          color: ["#707070"],
-          x: xScale(54),
-          y: yScale("All"),
-          dy: 180,
-          dx: 250
-        },
-        {
-          note: {
-            label: "The youngest MEP is 24 years old.",
-            wrap: 150
-          },
-          connector: {
-            color: ["#25891A"],
-            end: "dot",
-            type: "curve",
-            //can also add a curve type, e.g. curve: d3.curveStep
-            // points: [[100, 14],[190, 52]]
-          },
-          x: xScale(25),
-          y: yScale("All"),
-          dy: 137,
-          dx: 262
-        },
-        {
-          note: {
-            label: "The oldest MEP is 85 years old",
-            wrap: 150
-          },
-          connector: {
-            color: ["#25891A"],
-            end: "dot",
-            type: "curve",
-            //can also add a curve type, e.g. curve: d3.curveStep
-            // points: [[100, 14],[190, 52]]
-          },
-          x: xScale(83),
-          y: yScale("All"),
-          dy: 137,
-          dx: -10
-        },
-      ]
+
       xAxis = d3.axisTop(xScale).tickSizeOuter(0);
-      yAxis = d3.axisLeft(yScale).tickSize(width-margin.right).tickSizeOuter(0);
+      yAxis = d3
+        .axisLeft(yScale)
+        .tickSize(width - margin.left)
+        .tickSizeOuter(0);
+
       d3.transition(svg)
         .select(".x.axis")
         .transition()
         .duration(1000)
         .call(xAxis);
-      
-        d3.transition(svg)
+
+      d3.transition(svg)
         .select(".y.axis")
         .transition()
         .duration(1000)
-        .call(yAxis)
+        .call(yAxis);
 
-        var makeAnnotations = d3.annotation()
-                .annotations(centerAnnotation)
+      var makeAnnotations = d3.annotation().annotations(centerAnnotation);
 
       d3.select("svg")
         .append("g")
         .attr("class", "annotation-group")
-        .call(makeAnnotations)
-        //.attr("transform", "translate(" + (margin.left+10 ) + ",0)");
+        .call(makeAnnotations);
+
       // Create simulation with specified dataset
       let simulation = d3
         .forceSimulation(dataSet)
-        //  Apply positioning force to push nodes towards desired position along X axis
         .force(
           "x",
-          d3
-            .forceX(function (d) {
-                     // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
-              return xScale(+d["age"] ); // This is the desired position
-            })
+          d3.forceX(function (d) {
+            // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
+            return xScale(+d["age"]); // This is the desired position
+          })
         ) // Increase velocity
         .force("y", d3.forceY(yScale("All"))) // // Apply positioning force to push nodes towards center along Y axis
         .force("collide", d3.forceCollide(5)) // Apply collision force with radius of 8 - keeps nodes centers 8 pixels apart
@@ -236,19 +307,25 @@ d3.csv("data/mep-data.csv")
           return d.country;
         });
 
-      
       // fill bubles with color based on whatever we declare
       countriesCircles
         .enter()
         .append("circle")
         .attr("class", "countries")
         .attr("cx", 0)
-        .attr("cy",yScale("All"))
+        .attr("cy", yScale("All"))
         .attr("r", 3)
-        .attr("fill", function (d) {
-          return colors("europe");
+        .attr("fill", function(d){
+          if(d.age==minAge){
+            return "#25891A"
+          }
+          else if(d.age==maxAge){
+            return "#0E47C"
+          }
+          else {
+            return "#BCBCBC"
+          }
         })
-        //.attr("fill", function(d){ return colors(d.continent)})
         .merge(countriesCircles)
         .transition()
         .duration(2000)
@@ -258,155 +335,65 @@ d3.csv("data/mep-data.csv")
         .attr("cy", function (d) {
           return d.y;
         });
+       
 
-
-        d3.selectAll(".countries")
-          .on("mousemove", function (d) {
-            tooltip
-              .html(
-                `
-                  <div style="height:4px;width:100%;" class="red-line"></div>
-                  <div class="container">
-                  <div class="name"><h2>${d["mep_honorific_prefix"]} ${d["mep_given_name"]} ${d["mep_family_name"]}</h2></div><hr/>
-                  <div style="display:flex;" class="elected">
-                    <div style="text-align: left;width:50%;"><h5>Elected by</h5></div>
-                    <div style="text-align: right;width:50%;"><h5><strong>${d["country"]}</strong></h5></div>
-                  </div><hr/>
-                <div style="display:flex;" class="party">
-                  <div style="text-align: left;width:50%;"><h5>Party</h5></div>
-                  <div style="text-align: right;width:50%;"><h5><strong>${d["political_group_abb"]}</strong></h5></div>
-                </div><hr/>
-                <div style="display:flex;" class="age">
-                  <div style="text-align: left;width:50%;"><h5>Age</h5></div>
-                  <div style="text-align: right;width:50%;"><h5><strong>${d["age"]}</strong></h5></div>
-                </div><hr/>
-                </div>`
-              )
-              .style("top", d3.event.pageY - 12 + "px")
-              .style("left", d3.event.pageX + 25 + "px")
-              .style("opacity", 1);
-
-            
-          })
-          .on("mouseout", function (_) {
-            tooltip.style("opacity", 0);
-            xLine.attr("opacity", 0);
-          });
     }
 
     function redraw() {
-      
       let countries = [...new Set(dataSet.map((d) => d.country))];
       if (chartState.measure == Count.total) {
-        height=480;
-        let currentWidth = parseInt(d3.select('#svganchor').style('width'), 10);
-        svg.attr("height",height).attr("width",currentWidth)
-        // d3.select("svg").style("height",480)
-        d3.select(".selectedButton").style("display","none")
-        xScale = d3.scaleLinear().range([margin.left+50, currentWidth - margin.right-50]);
-        yScale = d3.scalePoint().range([height-margin.bottom, margin.top+50]);
-      
-        xScale.domain(
-        d3.extent(data, function (d) {
-          return +d["age"];
-        })
-        );
+        height = 480;
+        currentWidth = parseInt(d3.select("#svganchor").style("width"), 10);
+        svg.attr("height", height).attr("width", currentWidth);
+        d3.select(".selectedButton").style("display", "none");
+        xScale = d3
+          .scaleLinear()
+          .range([margin.left+50, currentWidth - margin.right - 50]);
+        yScale = d3
+          .scalePoint()
+          .range([height - margin.bottom, margin.top + 50]);
 
-      let xAxis;
-      let yAxis;
-      //  Set X axis based on new scale.
-      
-      yScale.domain(["All"]);
+        xScale.domain([20, 90]);
+        yScale.domain(["All"]);
+        let xAxis;
+        let yAxis;
 
-      const centerAnnotation = [
-        {
-          note: {
-            label: "The majority of MEPs are aged between 41 and 60 years old. The average MEP age is 52 years old."
-          },
-          type: d3.annotationCalloutCircle,
-          subject: {
-            radius: 180,         // circle radius
-            radiusPadding: 30   // white space around circle befor connector
-          },
-          color: ["#707070"],
-          x: xScale(54),
-          y: yScale("All"),
-          dy: 180,
-          dx: 250
-        },
-        {
-          note: {
-            label: "The youngest MEP is 24 years old.",
-            wrap: 150
-          },
-          connector: {
-            color: ["#25891A"],
-            end: "dot",
-            type: "curve",
-            //can also add a curve type, e.g. curve: d3.curveStep
-            // points: [[100, 14],[190, 52]]
-          },
-          x: xScale(25),
-          y: yScale("All"),
-          dy: 137,
-          dx: 262
-        },
-        {
-          note: {
-            label: "The oldest MEP is 85 years old",
-            wrap: 150
-          },
-          connector: {
-            color: ["#25891A"],
-            end: "dot",
-            type: "curve",
-            //can also add a curve type, e.g. curve: d3.curveStep
-            // points: [[100, 14],[190, 52]]
-          },
-          x: xScale(83),
-          y: yScale("All"),
-          dy: 137,
-          dx: -10
-        },
-      ]
-
-      xAxis = d3.axisTop(xScale);
-      yAxis = d3.axisLeft(yScale).tickSize(width-margin.right);
-      d3.transition(svg)
-        .select(".x.axis")
-        .transition()
-        .duration(1000)
-        .call(xAxis);
-      
+        //  Set X axis based on new scale.
+        xAxis = d3.axisTop(xScale);
+        yAxis = d3.axisLeft(yScale).tickSize(width - margin.right);
         d3.transition(svg)
-        .select(".y.axis")
-        .transition()
-        .duration(1000)
-        .call(yAxis)
+          .select(".x.axis")
+          .transition()
+          .duration(1000)
+          .call(xAxis);
 
-        var makeAnnotations = d3.annotation()
-        .annotations(centerAnnotation)
+        d3.transition(svg)
+          .select(".y.axis")
+          .transition()
+          .duration(1000)
+          .call(yAxis);
+
+        var makeAnnotations = d3.annotation().annotations(centerAnnotation);
         d3.selectAll(".annotation-group").remove();
-      d3.select("svg")
-      .append("g")
-      .attr("class", "annotation-group")
-      .call(makeAnnotations)    
+        d3.select("svg")
+          .append("g")
+          .attr("class", "annotation-group")
+          .call(makeAnnotations);
 
         // Create simulation with specified dataset
         let simulation = d3
           .forceSimulation(data)
-                        //  Apply positioning force to push nodes towards desired position along X axis
-          .force(      // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
+          //  Apply positioning force to push nodes towards desired position along X axis
+          .force(
+            // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
             "x",
             d3.forceX(function (d) {
-              
               return xScale(+d["age"]);
-             
             })
           )
 
           // Increase velocity
-          .force("y", d3.forceY(yScale("All") )) // // Apply positioning force to push nodes towards center along Y axis
+          .force("y", d3.forceY(yScale("All"))) // // Apply positioning force to push nodes towards center along Y axis
           .force("collide", d3.forceCollide(5)) // Apply collision force with radius of 8 - keeps nodes centers 8 pixels apart
           .stop(); // Stop simulation from starting automatically
 
@@ -414,75 +401,47 @@ d3.csv("data/mep-data.csv")
         for (let i = 0; i < data.length; ++i) {
           simulation.tick();
         }
-       
 
         // Create country circles
-         countriesCircles = svg
-          .selectAll(".countries")
-          
-        
-          countriesCircles
+        countriesCircles = svg.selectAll(".countries");
+
+        countriesCircles
           .transition()
           .duration(2000)
+          .attr("fill", function(d){
+            if(d.age==minAge){
+              return "#25891A"
+            }
+            else if(d.age==maxAge){
+              return "#0E47C"
+            }
+            else {
+              return "#BCBCBC"
+            }
+          })
           .attr("cx", function (d) {
             return d.x;
           })
           .attr("cy", function (d) {
             return d.y;
-          }); 
-
-        
-
-        // Show tooltip when hovering over circle (data for respective country)
-        d3.selectAll(".countries")
-          .on("mousemove", function (d) {
-            tooltip
-              .html(
-                `
-                  <div style="height:4px;width:100%;" class="red-line"></div>
-                  <div class="container">
-                  <div class="name"><h2>${d["mep_honorific_prefix"]} ${d["mep_given_name"]} ${d["mep_family_name"]}</h2></div><hr/>
-                  <div style="display:flex;" class="elected">
-                    <div style="text-align: left;width:50%;"><h5>Elected by</h5></div>
-                    <div style="text-align: right;width:50%;"><h5><strong>${d["country"]}</strong></h5></div>
-                  </div><hr/>
-                <div style="display:flex;" class="party">
-                  <div style="text-align: left;width:50%;"><h5>Party</h5></div>
-                  <div style="text-align: right;width:50%;"><h5><strong>${d["political_group_abb"]}</strong></h5></div>
-                </div><hr/>
-                <div style="display:flex;" class="age">
-                  <div style="text-align: left;width:50%;"><h5>Age</h5></div>
-                  <div style="text-align: right;width:50%;"><h5><strong>${d["age"]}</strong></h5></div>
-                </div><hr/>
-                </div>`
-              )
-              .style("top", d3.event.pageY - 12 + "px")
-              .style("left", d3.event.pageX + 25 + "px")
-              .style("opacity", 1);
-
-            
-          })
-          .on("mouseout", function (_) {
-            tooltip.style("opacity", 0);
-            xLine.attr("opacity", 0);
           });
       }
 
       if (chartState.measure === Count.perCap) {
-        height=countries.length*40
-        let currentWidth = parseInt(d3.select('#svganchor').style('width'), 10);
-        svg.attr("height",height).attr("width",currentWidth)
+        height = countries.length * 40;
+        let currentWidth = parseInt(d3.select("#svganchor").style("width"), 10);
+        svg.attr("height", height).attr("width", currentWidth);
         // d3.select("svg").style("height",countries.length*50)
-        
-        d3.select(".selectedButton").style("display",null)
-        xScale = d3.scaleLinear().range([margin.left+50, currentWidth - margin.right-50]);
-        yScale = d3.scalePoint().range([height-margin.bottom, margin.top+50]);
-        xScale.domain(
-          d3.extent(dataSet, function (d) {
-            return +d["age"];
-          })
-        );
-        
+
+        d3.select(".selectedButton").style("display", null);
+        xScale = d3
+          .scaleLinear()
+          .range([margin.left + 50, currentWidth - margin.right - 50]);
+        yScale = d3
+          .scalePoint()
+          .range([height - margin.bottom, margin.top + 50]);
+        xScale.domain([20, 90]);
+
         yScale.domain(countries);
 
         let xAxis;
@@ -490,8 +449,11 @@ d3.csv("data/mep-data.csv")
         // Set X axis based on new scale. If chart is set to "per capita" use numbers with one decimal point
 
         xAxis = d3.axisTop(xScale).tickSizeOuter(0);
-        
-        yAxis = d3.axisLeft(yScale).tickSize(width-margin.right-margin.left).tickSizeOuter(0);
+
+        yAxis = d3
+          .axisLeft(yScale)
+          .tickSize(width - margin.right - margin.left)
+          .tickSizeOuter(0);
         d3.selectAll(".annotation-group").remove();
         d3.transition(svg)
           .select(".x.axis")
@@ -501,7 +463,7 @@ d3.csv("data/mep-data.csv")
 
         d3.transition(svg)
           .select(".y.axis")
-          .attr("transform", "translate(" + (width) + ",0)")
+          .attr("transform", "translate(" + width + ",0)")
           .transition()
           .duration(1000)
           .call(yAxis);
@@ -514,25 +476,20 @@ d3.csv("data/mep-data.csv")
           .force(
             "x",
             d3.forceX(function (d) {
-              if(countries.length>0){
-                if(countries.includes(d.country))
-                return xScale(+d["age"]);
-                else
-                return xScale(0);}
-                else
-                return xScale(0) // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
-               // This is the desired position
+              if (countries.length > 0) {
+                if (countries.includes(d.country)) return xScale(+d["age"]);
+                else return xScale(0);
+              } else return xScale(0); // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
+              // This is the desired position
             })
           )
           //.force("collide", d3.forceCollide(8)) // Increase velocity
           .force(
             "y",
             d3.forceY(function (d) {
-              if(countries.length>0){
-              if(countries.includes(d.country))
-              return yScale(d["country"]);
-              else
-              return 0;
+              if (countries.length > 0) {
+                if (countries.includes(d.country)) return yScale(d["country"]);
+                else return 0;
               }
               return 0;
               // This is the desired position
@@ -545,18 +502,12 @@ d3.csv("data/mep-data.csv")
         // Manually run simulation
         for (let i = 0; i < data.length; ++i) {
           simulation.tick();
-          
         }
-        ;
         // Create country circles
-        countriesCircles = svg
-          .selectAll(".countries")
-          
+        countriesCircles = svg.selectAll(".countries");
 
-          
-
-          if(countries.length>0){
-            countriesCircles
+        if (countries.length > 0) {
+          countriesCircles
             .transition()
             .duration(2000)
             .attr("cx", function (d) {
@@ -564,65 +515,28 @@ d3.csv("data/mep-data.csv")
             })
             .attr("cy", function (d) {
               return d.y;
-            });}
-            else{countriesCircles
-              .transition()
-              .duration(2000)
-              .attr("cx", 0)
-              .attr("cy", function (d) {
-                return d.y;
-              });}  
-          
-          
-        // Show tooltip when hovering over circle (data for respective country)
-        d3.selectAll(".countries")
-          .on("mousemove", function (d) {
-            tooltip
-            .html(
-              `
-                <div style="height:4px;width:100%;" class="red-line"></div>
-                <div class="container">
-                <div class="name"><h2>${d["mep_honorific_prefix"]} ${d["mep_given_name"]} ${d["mep_family_name"]}</h2></div><hr/>
-                <div style="display:flex;" class="elected">
-                  <div style="text-align: left;width:50%;"><h5>Elected by</h5></div>
-                  <div style="text-align: right;width:50%;"><h5><strong>${d["country"]}</strong></h5></div>
-                </div><hr/>
-              <div style="display:flex;" class="party">
-                <div style="text-align: left;width:50%;"><h5>Party</h5></div>
-                <div style="text-align: right;width:50%;"><h5><strong>${d["political_group_abb"]}</strong></h5></div>
-              </div><hr/>
-              <div style="display:flex;" class="age">
-                <div style="text-align: left;width:50%;"><h5>Age</h5></div>
-                <div style="text-align: right;width:50%;"><h5><strong>${d["age"]}</strong></h5></div>
-              </div><hr/>
-              </div>`
-            )
-              .style("top", d3.event.pageY - 12 + "px")
-              .style("left", d3.event.pageX + 25 + "px")
-              .style("opacity", 1);
-
-            
-              
-          })
-          .on("mouseout", function (_) {
-            tooltip.style("opacity", 0);
-            xLine.attr("opacity", 0);
-            yLine.attr("opacity", 0);
-          });
+            });
+        } else {
+          countriesCircles
+            .transition()
+            .duration(2000)
+            .attr("cx", 0)
+            .attr("cy", function (d) {
+              return d.y;
+            });
+        }
       }
     }
 
-    window.addEventListener('resize', redraw );  
+    window.addEventListener("resize", redraw);
     // Filter data based on which checkboxes are ticked
 
     function filter() {
       function getCheckedBoxes(checkboxName) {
-        
         let checkboxes = d3.selectAll(checkboxName).nodes();
-        
+
         let checkboxesChecked = [];
         for (let i = 0; i < 27; i++) {
-          
           if (checkboxes[i].selected) {
             checkboxesChecked.push(checkboxes[i].value);
           }
@@ -635,7 +549,6 @@ d3.csv("data/mep-data.csv")
       let newData = [];
 
       if (checkedBoxes == null) {
-       
         dataSet = newData;
         redraw();
         return;
@@ -655,4 +568,3 @@ d3.csv("data/mep-data.csv")
   .catch(function (error) {
     if (error) throw error;
   });
-
