@@ -229,11 +229,23 @@ d3.csv("data/mep-data.csv")
           .style("top", d3.event.pageY - 12 + "px")
           .style("left", d3.event.pageX + 25 + "px")
           .style("opacity", 1);
+
+        d3.select(this).transition()
+          .duration(100)
+          .attr("r", 6);
+          
+
       })
       .on("mouseout", function (_) {
         tooltip.style("opacity", 0);
         xLine.attr("opacity", 0);
+        d3.select(this).transition()
+          .duration(100)
+          .attr("r", 3);
+        
       });
+
+      
     //redraw();
 
     // Listen to click on "total" and "per capita" buttons and trigger redraw when they are clicked

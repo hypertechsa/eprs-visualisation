@@ -218,6 +218,7 @@
       }
       .countries:hover{
         fill: #004494;
+        
       }
       .countries{
         z-index: 3;
