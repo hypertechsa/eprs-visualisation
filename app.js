@@ -231,7 +231,7 @@ d3.csv("data/mep-data.csv")
           .style("opacity", 1);
 
         d3.select(this).transition()
-          .duration(100)
+          .duration(300)
           .attr("r", 6);
           
 
@@ -240,7 +240,7 @@ d3.csv("data/mep-data.csv")
         tooltip.style("opacity", 0);
         xLine.attr("opacity", 0);
         d3.select(this).transition()
-          .duration(100)
+          .duration(300)
           .attr("r", 3);
         
       });
@@ -322,6 +322,7 @@ d3.csv("data/mep-data.csv")
       // Create simulation with specified dataset
       let simulation = d3
         .forceSimulation(dataSet)
+        
         .force(
           "x",
           d3.forceX(function (d) {
@@ -330,7 +331,7 @@ d3.csv("data/mep-data.csv")
           })
         ) // Increase velocity
         .force("y", d3.forceY(yScale("All"))) // // Apply positioning force to push nodes towards center along Y axis
-        .force("collide", d3.forceCollide(5)) // Apply collision force with radius of 8 - keeps nodes centers 8 pixels apart
+        .force("collide", d3.forceCollide(5)) // Apply collision force with radius of 5 - keeps nodes centers 8 pixels apart
         .stop(); // Stop simulation from starting automatically
 
       // Manually run simulation
