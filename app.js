@@ -1,6 +1,6 @@
-let height = 480;
+let height = 420;
 let width = parseInt(d3.select("#svganchor").style("width"), 10);
-let margin = { top: 10, right: 40, bottom: 34, left: 40 };
+let margin = { top: 2, right: 40, bottom: 34, left: 20 };
 
 // Data structure describing chart scales
 let Scales = {
@@ -76,7 +76,7 @@ let yScale = d3.scalePoint();
 svg
   .append("g")
   .attr("class", "x axis")
-  .attr("transform", "translate(0," + (margin.top + 10) + ")");
+  .attr("transform", "translate(0," + (margin.top + 25) + ")");
 
 svg
   .append("g")
@@ -126,6 +126,9 @@ d3.csv("data/mep-data.csv")
         return +d.age;
       })
     );
+
+    let agePerCountry={}
+  
     let currentWidth = parseInt(d3.select("#svganchor").style("width"), 10);
     xScale = d3
       .scaleLinear()
@@ -151,6 +154,7 @@ d3.csv("data/mep-data.csv")
           x1: xScale(41),
           x2: xScale(60),
           tick: annotationTicksStart
+
             .attr("x1", xScale(41))
             .attr("y1", yScale("All") + 100)
             .attr("x2", xScale(41))
@@ -250,6 +254,24 @@ d3.csv("data/mep-data.csv")
     d3.selectAll("select").on("change", filter);
 
     function initialize() {
+      let countries = [...new Set(dataSet.map((d) => d.country))];
+      countries.map((item)=>{
+        var temp = dataSet.filter(data=>data.country===item)
+        var minAge=d3.min(
+          d3.extent(temp, function (d) {
+            return +d.age;
+          }))
+
+        var maxAge=d3.max(
+            d3.extent(temp, function (d) {
+              return +d.age;
+            }))
+
+        var midAge= d3.sum(temp, d=>d.age)
+
+        agePerCountry[item]={"name":item,"minAge":minAge, "maxAge":maxAge,"midAge":Math.ceil(midAge/temp.length)}
+        
+      })
       d3.select(".selectedButton").style("display", "none");
 
       let xAxis;
@@ -273,13 +295,17 @@ d3.csv("data/mep-data.csv")
         .transition()
         .duration(1000)
         .call(yAxis);
-
+        if(currentWidth>800){
       var makeAnnotations = d3.annotation().annotations(centerAnnotation);
 
       d3.select("svg")
         .append("g")
         .attr("class", "annotation-group")
-        .call(makeAnnotations);
+        .call(makeAnnotations);}
+        else{
+          annotationTicksEnd.style("display","none")
+          annotationTicksStart.style("display","none")
+        }
 
       // Create simulation with specified dataset
       let simulation = d3
@@ -341,8 +367,9 @@ d3.csv("data/mep-data.csv")
 
     function redraw() {
       let countries = [...new Set(dataSet.map((d) => d.country))];
+      
       if (chartState.measure == Count.total) {
-        height = 480;
+        height = 420;
         currentWidth = parseInt(d3.select("#svganchor").style("width"), 10);
         svg.attr("height", height).attr("width", currentWidth);
         d3.select(".selectedButton").style("display", "none");
@@ -428,12 +455,22 @@ d3.csv("data/mep-data.csv")
           .duration(1000)
           .call(yAxis);
 
-        var makeAnnotations = d3.annotation().annotations(centerAnnotation);
+        
         d3.selectAll(".annotation-group").remove();
+
+        if(currentWidth>800){
+          var makeAnnotations = d3.annotation().annotations(centerAnnotation);
         d3.select("svg")
           .append("g")
           .attr("class", "annotation-group")
-          .call(makeAnnotations);
+          .call(makeAnnotations)
+          annotationTicksEnd.style("display",null)
+          annotationTicksStart.style("display",null)
+        }
+          else{
+            annotationTicksEnd.style("display","none")
+            annotationTicksStart.style("display","none")
+          }
 
         // Create simulation with specified dataset
         let simulation = d3
@@ -486,6 +523,7 @@ d3.csv("data/mep-data.csv")
       
       if (chartState.measure === Count.perCap) {
         height = countries.length * 40;
+        
         let currentWidth = parseInt(d3.select("#svganchor").style("width"), 10);
         svg.attr("height", height).attr("width", currentWidth);
         // d3.select("svg").style("height",countries.length*50)
@@ -512,6 +550,8 @@ d3.csv("data/mep-data.csv")
           .tickSize(width - margin.right - margin.left)
           .tickSizeOuter(0);
         d3.selectAll(".annotation-group").remove();
+        annotationTicksEnd.style("display","none")
+        annotationTicksStart.style("display","none")
         d3.transition(svg)
           .select(".x.axis")
           .transition()
@@ -535,20 +575,19 @@ d3.csv("data/mep-data.csv")
             d3.forceX(function (d) {
               if (countries.length > 0) {
                 if (countries.includes(d.country)) return xScale(+d["age"]);
-                else return xScale(0);
-              } else return xScale(0); // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
+                else return xScale(+d["age"]);
+              } else return xScale(+d["age"]); // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
               // This is the desired position
             })
           )
-          //.force("collide", d3.forceCollide(8)) // Increase velocity
           .force(
             "y",
             d3.forceY(function (d) {
               if (countries.length > 0) {
                 if (countries.includes(d.country)) return yScale(d["country"]);
-                else return 0;
+                else return 2000;
               }
-              return 0;
+              return 2000;
               // This is the desired position
             })
           )
@@ -567,11 +606,13 @@ d3.csv("data/mep-data.csv")
           countriesCircles
             .transition()
             .duration(2000)
+            // .filter(function(d, i) { return i === 0 || i === (dataSet.length - 1) })
             .attr("fill",function (d, index) {
-              if(index===0){
+
+              if(agePerCountry[d.country].minAge==d.age){
                 return "#25891A"
               }
-              else if (index === data.length-1)
+              else if (agePerCountry[d.country].maxAge==d.age)
               {
                 return "#0E47CB";
             }
@@ -595,10 +636,11 @@ d3.csv("data/mep-data.csv")
               return d.y;
             });
         }
+        
        
       }
-    }
-
+    } 
+    
     window.addEventListener("resize", redraw);
     // Filter data based on which checkboxes are ticked
 
