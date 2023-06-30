@@ -1,6 +1,6 @@
 
       body {
-        
+        width: 100%;
         margin: 0;
         height: 100vh;
         display: flex;
@@ -120,13 +120,15 @@
 
       .selectedButton {
          text-align: right; 
-        
+         padding-right: 80px; 
         
       } 
        
        @media screen and (max-width: 1300px) {
         .selectedButton {
           text-align: left;
+          margin: 12%;
+          margin-top: 5px;
         }
         .measure-group{
           display: block;
@@ -227,7 +229,9 @@
       .annotation-group{
         font-size: 12px;
       }
-
+      .container{
+        max-width: 1920px;
+      }
       /* @media screen and (max-width: 1200px) {
         .annotation-group {
           display: none;
@@ -285,6 +289,10 @@
         font-family: Arial, Helvetica, sans-serif;
       }
 
+      .fa-solid{
+        color:#004494;
+        margin-left: 5px;
+      }
       .seperator {
         width: 100%;
         padding-left: 33px;
@@ -314,6 +322,8 @@
       }
       
       .photos img {
+        height: 200px;
+        width: 200px;
         padding: 25px;
       }
 
