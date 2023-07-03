@@ -140,7 +140,7 @@
         height: 25px;
         width: 173px;
         padding-top: 2px;
-        font-size: 13px;
+        font-size: 12px;
         background-color: #fff;
         border-color: #404040;
         font-family: Arial, Helvetica, sans-serif;
@@ -150,10 +150,24 @@
       }
       .inner{
         max-height: 200px;
-        font-size: 13px;
+        font-size: 12px;
         font-family: Arial, Helvetica, sans-serif;
       }
 
+      .bootstrap-select .bs-ok-default:after {
+        font-family: 'Material Icons Outlined';
+        content: "done";
+        display: block;
+        /* width: 0.5em; */
+        height: 1em;
+        right:10px;
+        border-style: none;
+        border-width: none;
+        -webkit-transform: rotate(0);
+        -ms-transform: rotate(0);
+        -o-transform: rotate(0);
+        transform: rotate(0);
+      }
       input,
       p {
         display: inline-block;
@@ -169,10 +183,6 @@
       button {
         /* margin:0 auto; */
         display: block;
-      }
-
-      .measure,
-      .scale {
       }
 
       svg {
@@ -272,8 +282,20 @@
       .axis text {
         font: 10px sans-serif;
       }
-
-      .continent {
+      .dropdown-menu::before{
+        display: none;
+      }
+      .actions-btn{
+        border: 1px solid grey;
+      }
+      .btn-group-sm>.btn, .btn-sm{
+        padding: 2px;
+        font-size: 12px;
+      }
+      .btn-group-sm>.btn:hover{
+        background-color:#1a438f;
+        color: white;
+        border: 1px solid #1a438f;
       }
       .highlight {
         padding: 0.25em;
@@ -322,15 +344,23 @@
       }
       
       .photos img {
-        height: 200px;
-        width: 200px;
-        padding: 25px;
+        height: auto;
+        width: 180px;
+        padding: 20px;
       }
 
       .annotation-note path{
         display: none;
       }
       
+      .disclaimer-title{
+        font-size: 14px;
+        font-weight: bold;
+      }
+      .disclaimer-body{
+        font-size: 14px;
+        font-weight: normal;
+      }
       /* .legend {
             fill: rgba(0,0,0,.87);
         }
