@@ -239,7 +239,6 @@ d3.csv("data/mep-data.csv")
         radius = Array.apply(null, Array(706)).map(function () {
           return 3;
         });
-        console.log(radius);
         redraw();
       });
 
@@ -487,6 +486,7 @@ d3.csv("data/mep-data.csv")
 
         d3.selectAll(".annotation-group").remove();
         d3.selectAll(".text-age").remove();
+        d3.selectAll(".text-midage").remove();
         d3.selectAll(".line-age").remove();
 
         if (currentWidth > 800) {
@@ -560,6 +560,7 @@ d3.csv("data/mep-data.csv")
 
       if (chartState.measure === Count.perCap) {
         d3.selectAll(".text-age").remove();
+        d3.selectAll(".text-midage").remove();
         d3.selectAll(".line-age").remove();
 
         if (countries.length < 10) {
@@ -664,11 +665,9 @@ d3.csv("data/mep-data.csv")
                     }
                   })
                   .attr("cx", function (d) {
-                    console.log("eimai xxx");
                     return d.x;
                   })
                   .attr("cy", function (d) {
-                    console.log("eimai yyy");
                     return d.y;
                   })
                   .attr("r", function (d, i) {
@@ -692,38 +691,54 @@ d3.csv("data/mep-data.csv")
 
 
               
+
               
               
-              svg.selectAll("text").data(dataSet).enter().append("text").attr("class","text-age")
-              .attr('x',function(d){
-                console.log("lalalalala"+d.country)
+              for( const d of dataSet){
+                console.log(d.country+" "+ agePerCountry[d.country].midAge)
+                svg.append("text").attr("class","text-age")
+              .attr('x',function(){
+               
                 return xScale(d.age)-10
               })
-              .attr('y',function(d){
+              .attr('y',function(){
                 return yScale(d.country)-20
               })
               .attr("dy", ".35em")
-              .style("fill",function(d){
+              .style("fill",function(){
                 if(agePerCountry[d.country].minAge==d.age){
                   return "#25891A"
                 }else if(agePerCountry[d.country].midAge==d.age)
                 {return "#3B3A3A"}
                 else if(agePerCountry[d.country].maxAge==d.age){return "#0E47CB"}
               })
-              .text(function(d){
-                if(agePerCountry[d.country].minAge==d.age||agePerCountry[d.country].midAge==d.age||agePerCountry[d.country].maxAge==d.age){
-                return d.age}
+              .text(function(){
+                if(agePerCountry[d.country].minAge==d.age||agePerCountry[d.country].maxAge==d.age)
+                       return d.age
               })
-              
-              for( const d of dataSet){
-                if(agePerCountry[d.country].midAge==d.age){
-                  console.log(agePerCountry[d.country].midAge)
+                
+              svg.append("text").attr("class","text-midage")
+              .attr('x',function(){
+               
+                return xScale(agePerCountry[d.country].midAge)-10
+              })
+              .attr('y',function(){
+                return yScale(d.country)-20
+              })
+              .attr("dy", ".35em")
+              .style("fill","#3B3A3A")
+              .text(function(){
+                
+                       return agePerCountry[d.country].midAge
+              })
+
+
               svg.append("line").attr("stroke", "#1A438F").attr("class","line-age")
-                .attr("x1",  xScale(d.age))
+                .attr("x1",  xScale(agePerCountry[d.country].midAge))
                 .attr("y1", yScale(d.country)+12)
-                .attr("x2",  xScale(d.age))
+                .attr("x2",  xScale(agePerCountry[d.country].midAge))
                 .attr("y2", yScale(d.country)-12)
-              }
+              
               }
       }
     }
