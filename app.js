@@ -113,7 +113,7 @@ let tooltip2 = d3
 d3.csv("data/mep-data.csv")
   .then(function (data) {
     let dataSet = data;
-
+    let countries = [...new Set(dataSet.map((d) => d.country))];
     let minAge = d3.min(
       d3.extent(data, function (d) {
         return +d.age;
@@ -195,6 +195,51 @@ d3.csv("data/mep-data.csv")
         dx: 0,
       },
     ];
+    let simulation = d3
+        .forceSimulation()
+
+        .force(
+          "x",
+          d3.forceX(function (d) {
+            if (countries.length > 0) {
+              
+              if (countries.includes(d.country)) { 
+              return xScale(+d["age"]);}
+              else return xScale(+d["age"]);
+            } else return xScale(+d["age"]); // This is the desired position
+          })
+        ) // Increase velocity
+        .force("y", d3.forceY(function (d) { if(d.country =="All"){
+                            
+                            return yScale("All");}
+                            else{
+                              if (countries.length > 0) {
+                                
+                              if (countries.includes(d.country)) {
+                                
+                                return yScale(d["country"]);}
+
+                              else return 2000;
+                    }
+                    return 2000;}
+                }
+        )) // // Apply positioning force to push nodes towards center along Y axis
+        .force(
+          "collide",
+          d3.forceCollide().radius((d, i) => radius[i] + 1)
+        ) // Apply collision force with radius of 5 - keeps nodes centers 8 pixels apart
+        .stop(); // Stop simulation from starting automatically
+        
+        let countriesCircles = svg
+        .selectAll(".countries")
+        .data(data, function (d) {
+          return d.country;
+        });
+
+        var temp= structuredClone(dataSet);
+      for (const d of temp){
+        d.country="All"
+      }
     initialize();
 
     d3.selectAll(".countries")
@@ -262,6 +307,7 @@ d3.csv("data/mep-data.csv")
     // Trigger filter function whenever checkbox is ticked/unticked
 
     d3.selectAll("select").on("change", filter);
+    
 
     function pointed(event) {
       let circle = d3.select(this);
@@ -276,7 +322,7 @@ d3.csv("data/mep-data.csv")
     }
 
     function initialize() {
-      let countries = [...new Set(dataSet.map((d) => d.country))];
+      
       countries.map((item) => {
         var temp = dataSet.filter((data) => data.country === item);
         var minAge = d3.min(
@@ -323,6 +369,9 @@ d3.csv("data/mep-data.csv")
         .transition()
         .duration(1000)
         .call(yAxis);
+
+
+        d3.selectAll(".legend").style('display',"none");
       if (currentWidth > 800) {
         var makeAnnotations = d3.annotation().annotations(centerAnnotation);
 
@@ -334,24 +383,10 @@ d3.csv("data/mep-data.csv")
         annotationTicksEnd.style("display", "none");
         annotationTicksStart.style("display", "none");
       }
-
+      
       // Create simulation with specified dataset
-      let simulation = d3
-        .forceSimulation(dataSet)
-
-        .force(
-          "x",
-          d3.forceX(function (d) {
-            // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
-            return xScale(+d["age"]); // This is the desired position
-          })
-        ) // Increase velocity
-        .force("y", d3.forceY(yScale("All"))) // // Apply positioning force to push nodes towards center along Y axis
-        .force(
-          "collide",
-          d3.forceCollide().radius((d, i) => radius[i] + 1)
-        ) // Apply collision force with radius of 5 - keeps nodes centers 8 pixels apart
-        .stop(); // Stop simulation from starting automatically
+      simulation.alphaTarget(0.01)
+      simulation.nodes(temp);
 
       // Manually run simulation
       for (let i = 0; i < dataSet.length; ++i) {
@@ -359,14 +394,12 @@ d3.csv("data/mep-data.csv")
       }
 
       // Create country circles
-      let countriesCircles = svg
-        .selectAll(".countries")
-        .data(dataSet, function (d) {
-          return d.country;
-        });
+      
 
       // fill bubles with color based on whatever we declare
-      countriesCircles
+      
+
+        countriesCircles
         .enter()
         .append("circle")
         .attr("class", "countries")
@@ -382,12 +415,15 @@ d3.csv("data/mep-data.csv")
         .merge(countriesCircles)
         .transition()
         .duration(2000)
-        .attr("r", 3)
-        .attr("cx", function (d) {
-          return d.x;
+        .attr("r", function (d,i) {
+          return radius[i];
         })
-        .attr("cy", function (d) {
-          return d.y;
+        .attr("cx", function (d,i) {
+          
+          return temp[i].x;
+        })
+        .attr("cy", function (d,i) {
+          return temp[i].y;
         });
     }
 
@@ -488,6 +524,7 @@ d3.csv("data/mep-data.csv")
         d3.selectAll(".text-age").remove();
         d3.selectAll(".text-midage").remove();
         d3.selectAll(".line-age").remove();
+        d3.selectAll(".legend").style('display',"none");
 
         if (currentWidth > 800) {
           var makeAnnotations = d3.annotation().annotations(centerAnnotation);
@@ -502,56 +539,42 @@ d3.csv("data/mep-data.csv")
           annotationTicksStart.style("display", "none");
         }
 
-        // Create simulation with specified dataset
-        let defaultSimulation = d3
-          .forceSimulation(data)
-          //  Apply positioning force to push nodes towards desired position along X axis
-          .force(
-            // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
-            "x",
-            d3.forceX(function (d) {
-              return xScale(+d["age"]);
-            })
-          )
 
-          // Increase velocity
+        console.log(temp)
+      // Create simulation with specified dataset
+      simulation
+      .alphaTarget(0.01)
+      .restart();
+      simulation.force("x").initialize(temp);
+      simulation.force("y").initialize(temp);
+    simulation.force("collide").initialize(temp);
 
-          .force("y", d3.forceY(yScale("All"))) // // Apply positioning force to push nodes towards center along Y axis
-          
-          .force(
-            "collide",
-            d3.forceCollide().radius((d, i) => radius[i] + 1)
-          ) // Apply collision force with radius of 8 - keeps nodes centers 8 pixels apart
-          .stop();
-
-          
+    
         // Manually run simulation
         for (let i = 0; i < data.length; ++i) {
-          defaultSimulation.tick();
+          simulation.tick();
         }
-
+        console.log(temp)
         // // Move country circles
 
-        countriesCircles = svg.selectAll(".countries")
-        .data(data)
-          .merge(countriesCircles)
+        countriesCircles 
           .transition()
-          .duration(2000)
+          .duration(2500)
           .attr("fill", function (d) {
             if (d.age == minAge) {
               return "#25891A";
             } else if (d.age == maxAge) {
-              return "#0E47C";
+              return "#0E47CB";
             } else {
               return "#BCBCBC";
             }
           })
 
           .attr("cx", function (d, i) {
-            return d.x;
+            return temp[i].x;
           })
-          .attr("cy", function (d) {
-            return d.y;
+          .attr("cy", function (d,i) {
+            return  temp[i].y;
           })
           .attr("r", function (d, i) {
             return radius[i];
@@ -562,6 +585,7 @@ d3.csv("data/mep-data.csv")
         d3.selectAll(".text-age").remove();
         d3.selectAll(".text-midage").remove();
         d3.selectAll(".line-age").remove();
+        d3.selectAll(".legend").style('display',null);
 
         if (countries.length < 10) {
           height = 10 * 40;
@@ -610,8 +634,9 @@ d3.csv("data/mep-data.csv")
           .duration(1000)
           .call(yAxis);
 
-        // Create simulation with specified dataset
-        let memberSimulation = d3
+        
+   
+          let memberSimulation = d3
           .forceSimulation(data)
           // Apply positioning force to push nodes towards desired position along X axis
 
@@ -650,7 +675,7 @@ d3.csv("data/mep-data.csv")
               if (countries.length > 0) {
           countriesCircles
             .transition()
-            .duration(1000)
+            .duration(1500)
             .attr("fill",function (d, index) {
                 
               if(agePerCountry[d.country].minAge==d.age){
@@ -686,51 +711,42 @@ d3.csv("data/mep-data.csv")
                   });
               }
 
-
-              
-
-
-              
-
-              
-              
               for( const d of dataSet){
-                console.log(d.country+" "+ agePerCountry[d.country].midAge)
-                svg.append("text").attr("class","text-age")
-              .attr('x',function(){
+              //   svg.append("text").attr("class","text-age")
+              // .attr('x',function(){
                
-                return xScale(d.age)-10
-              })
-              .attr('y',function(){
-                return yScale(d.country)-20
-              })
-              .attr("dy", ".35em")
-              .style("fill",function(){
-                if(agePerCountry[d.country].minAge==d.age){
-                  return "#25891A"
-                }else if(agePerCountry[d.country].midAge==d.age)
-                {return "#3B3A3A"}
-                else if(agePerCountry[d.country].maxAge==d.age){return "#0E47CB"}
-              })
-              .text(function(){
-                if(agePerCountry[d.country].minAge==d.age||agePerCountry[d.country].maxAge==d.age)
-                       return d.age
-              })
+              //   return xScale(d.age)-10
+              // })
+              // .attr('y',function(){
+              //   return yScale(d.country)-20
+              // })
+              // .attr("dy", ".35em")
+              // .style("fill",function(){
+              //   if(agePerCountry[d.country].minAge==d.age){
+              //     return "#25891A"
+              //   }else if(agePerCountry[d.country].midAge==d.age)
+              //   {return "#3B3A3A"}
+              //   else if(agePerCountry[d.country].maxAge==d.age){return "#0E47CB"}
+              // })
+              // .text(function(){
+              //   if(agePerCountry[d.country].minAge==d.age||agePerCountry[d.country].maxAge==d.age)
+              //          return d.age
+              // })
                 
-              svg.append("text").attr("class","text-midage")
-              .attr('x',function(){
+              // svg.append("text").attr("class","text-midage")
+              // .attr('x',function(){
                
-                return xScale(agePerCountry[d.country].midAge)-10
-              })
-              .attr('y',function(){
-                return yScale(d.country)-20
-              })
-              .attr("dy", ".35em")
-              .style("fill","#3B3A3A")
-              .text(function(){
+              //   return xScale(agePerCountry[d.country].midAge)-10
+              // })
+              // .attr('y',function(){
+              //   return yScale(d.country)-20
+              // })
+              // .attr("dy", ".35em")
+              // .style("fill","#3B3A3A")
+              // .text(function(){
                 
-                       return agePerCountry[d.country].midAge
-              })
+              //          return agePerCountry[d.country].midAge
+              // })
 
 
               svg.append("line").attr("stroke", "#1A438F").attr("class","line-age")

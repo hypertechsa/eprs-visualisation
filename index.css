@@ -180,6 +180,7 @@
         display: inline;
       }
 
+
       button {
         /* margin:0 auto; */
         display: block;
@@ -361,6 +362,77 @@
         font-size: 14px;
         font-weight: normal;
       }
+
+      .chartpng{
+        
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .datacsv{
+        
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .svgmenu{
+        margin: 0;
+        margin-top: 50px;
+      }
+
+      .legend{
+        display: flex;
+        font-size: 12px;
+        justify-content: flex-end;
+        padding-right: 60px;
+        
+      }
+      .green-bullet{
+        display: list-item;
+        list-style-image: url('./data/Ellipse\ 2046.png');
+        margin-left:10px;
+        /* padding-bottom: 20px; */
+      }
+      .blue-bullet{
+        display: list-item;
+        list-style-image: url('./data/Ellipse\ 2055.png');        
+        margin-left:40px;
+        /* padding-bottom: 20px; */
+      }
+      .mid-line{
+        display: list-item;
+        list-style-image: url('./data/Line\ 216.png');
+        margin-left: 50px;
+         
+      }
+      .mid-line::marker{
+        padding-bottom: 400px; 
+      }
+
+      
+      .mobile-show{
+        display: none;  
+        }
+      @media screen and (max-width: 1100px) {
+        .mobile-hide{
+          display: none;  
+          }
+        .mobile-show{
+          display: contents;  
+        }
+      }
+      .top-button{
+        padding-top: 11px;
+        margin-right: 95px;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .top-list{
+        list-style: none;
+        .ecl-tabs__link--active{
+        border-top-color:#FFD617
+      }
+      }
+
       /* .legend {
             fill: rgba(0,0,0,.87);
         }
