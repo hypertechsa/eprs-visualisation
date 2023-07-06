@@ -281,16 +281,15 @@ d3.csv("data/mep-data.csv")
       })
       .on("mouseout", function (_) {
         tooltip.style("opacity", 0);
-        xLine.attr("opacity", 0);
         radius = Array.apply(null, Array(706)).map(function () {
           return 3;
         });
-        redraw();
+        move()
       });
 
     d3.selectAll(".countries")
       .on("touchmove", (event) => event.preventDefault())
-      .on("click", pointed);
+      .on("mouseover", pointed);
 
     // Listen to click on "total" and "per capita" buttons and trigger redraw when they are clicked
     d3.selectAll(".measure").on("click", function () {
@@ -319,7 +318,7 @@ d3.csv("data/mep-data.csv")
         else radius[index] = 3;
         index++;
       }
-      redraw();
+      move();
     }
 
     function initialize() {
@@ -437,6 +436,120 @@ d3.csv("data/mep-data.csv")
         .attr("cy", function (d,i) {
           return d.y;
         });
+    }
+
+    function move() {
+      
+      let countries = [...new Set(dataSet.map((d) => d.country))];
+      if (chartState.measure == Count.total) {
+       
+      // Create simulation with specified dataset
+      defaultSimulation.alphaTarget(0.1).restart()
+      defaultSimulation.nodes(data);
+    
+    
+        // Manually run simulation
+      for(let i=0;i<40;i++){defaultSimulation.tick();}
+          
+        
+        
+        countriesCircles = svg
+        .selectAll(".countries")
+        
+        // // Move country circles
+
+        countriesCircles 
+          .transition()
+          .duration(1500)
+          .attr("cx", function (d, i) {
+            return d.x;
+          })
+          .attr("cy", function (d,i) {
+            return  d.y;
+          })
+          .attr("r", function (d, i) {
+            return radius[i];
+          });
+      }
+
+      if (chartState.measure === Count.perCap) {
+          let memberSimulation = d3
+          .forceSimulation(data)
+          // Apply positioning force to push nodes towards desired position along X axis
+
+          .force(
+            "x",
+            d3.forceX(function (d) {
+              if (countries.length > 0) {
+                if (countries.includes(d.country)) return xScale(+d["age"]);
+                else return xScale(+d["age"]);
+              } else return xScale(+d["age"]); // Mapping of values from age/country column of dataset to range of SVG chart (<margin.left, margin.right>)
+              // This is the desired position
+            })
+          )
+          .force(
+            "y",
+            d3.forceY(function (d) {
+              if (countries.length > 0) {
+                if (countries.includes(d.country)) return yScale(d["country"]);
+                else return 2000;
+              }
+              return 2000;
+              // This is the desired position
+            })
+          )
+          .force("collide", d3.forceCollide().radius((d,i)=> radius[i]+1)) // // Apply positioning force to push nodes towards center along Y axis
+
+           // Stop simulation from starting automatically
+   
+        // Manually run simulation
+        
+        for(let i=0;i<30;i++){memberSimulation.tick();}
+        
+        // Move country circles
+        // countriesCircles = svg.selectAll(".countries");
+
+              if (countries.length > 0) {
+          countriesCircles
+            .transition()
+            .duration(1000)
+            .attr("fill",function (d, index) {
+                
+              if(agePerCountry[d.country].minAge==d.age){
+                return "#25891A"
+              }
+              else if (agePerCountry[d.country].maxAge==d.age)
+              {
+                      return "#0E47CB";
+            }
+            else {
+              return "#BCBCBC"
+                    }
+                  })
+                  .attr("cx", function (d) {
+                    return d.x;
+                  })
+                  .attr("cy", function (d) {
+                    return d.y;
+                  })
+                  .attr("r", function (d, i) {
+                    return radius[i];
+                  });
+
+
+              
+              } else {
+                countriesCircles = svg
+                .selectAll(".countries")
+                .data(data)                  
+                  .attr("cx", 0)
+                  .attr("cy", function (d) {
+                    return d.y;
+                  });
+              }
+
+             
+      }
     }
 
     function redraw() {
