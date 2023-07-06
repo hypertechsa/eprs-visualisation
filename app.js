@@ -213,7 +213,7 @@ d3.csv("data/mep-data.csv")
         .force(
           "collide",
           d3.forceCollide().radius((d, i) => radius[i] + 1)
-        ) // Apply collision force with radius of 5 - keeps nodes centers 8 pixels apart
+        ).stop() // Apply collision force with radius of 5 - keeps nodes centers 8 pixels apart
          // Stop simulation from starting automatically
         
     let defaultSimulation = d3
@@ -392,7 +392,7 @@ d3.csv("data/mep-data.csv")
         d3.select(".y").style("opacity",0)
       }
       // Create simulation with specified dataset
-      simulation.alphaTarget(0.1)
+      simulation.alphaTarget(0.3)
       simulation.nodes(data);
 
       // Manually run simulation
@@ -442,14 +442,29 @@ d3.csv("data/mep-data.csv")
       
       let countries = [...new Set(dataSet.map((d) => d.country))];
       if (chartState.measure == Count.total) {
-       
+        // let defaultSimulation = d3
+        // .forceSimulation(data)
+        // .force(
+        //   "x",
+        //   d3.forceX(function (d) {
+        //     return xScale(+d["age"]); // This is the desired position
+        //   })
+        // ) // Increase velocity
+        // .force("y", d3.forceY(function (d) { 
+        //                     return yScale("All");
+        //         }
+        // )) // // Apply positioning force to push nodes towards center along Y axis
+        // .force(
+        //   "collide",
+        //   d3.forceCollide().radius((d, i) => radius[i] + 2)
+        // )  
       // Create simulation with specified dataset
-      defaultSimulation.alphaTarget(0.1).restart()
+      defaultSimulation.alphaTarget(0.3).restart()
       defaultSimulation.nodes(data);
     
     
         // Manually run simulation
-      for(let i=0;i<40;i++){defaultSimulation.tick();}
+      for(let i=0;i<80;i++){defaultSimulation.tick();}
           
         
         
@@ -673,7 +688,7 @@ d3.csv("data/mep-data.csv")
         }
         
       // Create simulation with specified dataset
-      defaultSimulation.alphaTarget(0.1).restart()
+      defaultSimulation.alphaTarget(0.3).restart()
       defaultSimulation.nodes(data);
     
     
