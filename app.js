@@ -201,45 +201,39 @@ d3.csv("data/mep-data.csv")
         .force(
           "x",
           d3.forceX(function (d) {
-            if (countries.length > 0) {
-              
-              if (countries.includes(d.country)) { 
-              return xScale(+d["age"]);}
-              else return xScale(+d["age"]);
-            } else return xScale(+d["age"]); // This is the desired position
+            return xScale(+d["age"]); // This is the desired position
           })
         ) // Increase velocity
-        .force("y", d3.forceY(function (d) { if(d.country =="All"){
+        .force("y", d3.forceY(function (d) { 
                             
-                            return yScale("All");}
-                            else{
-                              if (countries.length > 0) {
-                                
-                              if (countries.includes(d.country)) {
-                                
-                                return yScale(d["country"]);}
-
-                              else return 2000;
-                    }
-                    return 2000;}
+                            return yScale("All");
+                            
                 }
         )) // // Apply positioning force to push nodes towards center along Y axis
         .force(
           "collide",
           d3.forceCollide().radius((d, i) => radius[i] + 1)
         ) // Apply collision force with radius of 5 - keeps nodes centers 8 pixels apart
-        .stop(); // Stop simulation from starting automatically
+         // Stop simulation from starting automatically
         
-        let countriesCircles = svg
-        .selectAll(".countries")
-        .data(data, function (d) {
-          return d.country;
-        });
+    let defaultSimulation = d3
+         .forceSimulation()
+         .force(
+           "x",
+           d3.forceX(function (d) {
+             return xScale(+d["age"]); // This is the desired position
+           })
+         ) // Increase velocity
+         .force("y", d3.forceY(function (d) { 
+                             return yScale("All");
+                 }
+         )) // // Apply positioning force to push nodes towards center along Y axis
+         .force(
+           "collide",
+           d3.forceCollide().radius((d, i) => radius[i] + 1)
+         ).stop()  
 
-        var temp= structuredClone(dataSet);
-      for (const d of temp){
-        d.country="All"
-      }
+       
     initialize();
 
     d3.selectAll(".countries")
@@ -274,9 +268,16 @@ d3.csv("data/mep-data.csv")
             </div><hr/>
             </div>`
           )
+          if (currentWidth>500 || width>500) {
+            tooltip
           .style("top", d3.event.pageY - 12 + "px")
           .style("left", d3.event.pageX + 25 + "px")
           .style("opacity", 1);
+          }else
+          {tooltip
+          .style("top",  "45%")
+          .style("left", margin.left  + "px")
+          .style("opacity", 1);}
       })
       .on("mouseout", function (_) {
         tooltip.style("opacity", 0);
@@ -289,7 +290,7 @@ d3.csv("data/mep-data.csv")
 
     d3.selectAll(".countries")
       .on("touchmove", (event) => event.preventDefault())
-      .on("mouseover", pointed);
+      .on("click", pointed);
 
     // Listen to click on "total" and "per capita" buttons and trigger redraw when they are clicked
     d3.selectAll(".measure").on("click", function () {
@@ -384,9 +385,16 @@ d3.csv("data/mep-data.csv")
         annotationTicksStart.style("display", "none");
       }
       
+      if(currentWidth>500){
+        // d3.select(".y .axes").style("display","contents")
+        d3.select(".y").style("opacity",1)
+
+      }else{
+        d3.select(".y").style("opacity",0)
+      }
       // Create simulation with specified dataset
-      simulation.alphaTarget(0.01)
-      simulation.nodes(temp);
+      simulation.alphaTarget(0.1)
+      simulation.nodes(data);
 
       // Manually run simulation
       for (let i = 0; i < dataSet.length; ++i) {
@@ -397,7 +405,11 @@ d3.csv("data/mep-data.csv")
       
 
       // fill bubles with color based on whatever we declare
-      
+      let countriesCircles = svg
+        .selectAll(".countries")
+        .data(data, function (d) {
+          return d.country;
+        });
 
         countriesCircles
         .enter()
@@ -420,10 +432,10 @@ d3.csv("data/mep-data.csv")
         })
         .attr("cx", function (d,i) {
           
-          return temp[i].x;
+          return d.x;
         })
         .attr("cy", function (d,i) {
-          return temp[i].y;
+          return d.y;
         });
     }
 
@@ -538,28 +550,33 @@ d3.csv("data/mep-data.csv")
           annotationTicksEnd.style("display", "none");
           annotationTicksStart.style("display", "none");
         }
-
-
-        console.log(temp)
+       
+        if(currentWidth>500){
+          // d3.select(".y .axes").style("display","contents")
+          d3.select(".y").style("opacity",1)
+  
+        }else{
+          d3.select(".y").style("opacity",0)
+        }
+        
       // Create simulation with specified dataset
-      simulation
-      .alphaTarget(0.01)
-      .restart();
-      simulation.force("x").initialize(temp);
-      simulation.force("y").initialize(temp);
-    simulation.force("collide").initialize(temp);
-
+      defaultSimulation.alphaTarget(0.1).restart()
+      defaultSimulation.nodes(data);
+    
     
         // Manually run simulation
         for (let i = 0; i < data.length; ++i) {
-          simulation.tick();
+          defaultSimulation.tick();
         }
-        console.log(temp)
+        
+        countriesCircles = svg
+        .selectAll(".countries")
+        
         // // Move country circles
 
         countriesCircles 
           .transition()
-          .duration(2500)
+          .duration(1000)
           .attr("fill", function (d) {
             if (d.age == minAge) {
               return "#25891A";
@@ -571,10 +588,10 @@ d3.csv("data/mep-data.csv")
           })
 
           .attr("cx", function (d, i) {
-            return temp[i].x;
+            return d.x;
           })
           .attr("cy", function (d,i) {
-            return  temp[i].y;
+            return  d.y;
           })
           .attr("r", function (d, i) {
             return radius[i];
@@ -586,6 +603,7 @@ d3.csv("data/mep-data.csv")
         d3.selectAll(".text-midage").remove();
         d3.selectAll(".line-age").remove();
         d3.selectAll(".legend").style('display',null);
+        d3.select(".y").style("opacity",1)
 
         if (countries.length < 10) {
           height = 10 * 40;
@@ -598,12 +616,19 @@ d3.csv("data/mep-data.csv")
         // d3.select("svg").style("height",countries.length*50)
 
         d3.select(".selectedButton").style("display", null);
-        xScale = d3
+        if(currentWidth>500)
+       { xScale = d3
           .scaleLinear()
           .range([margin.left + 80, currentWidth - margin.right - 50]);
         yScale = d3
           .scalePoint()
-          .range([height - margin.bottom, margin.top + 50]);
+          .range([height - margin.bottom, margin.top + 50]);}
+          else{xScale = d3
+            .scaleLinear()
+            .range([margin.left + 80, currentWidth - margin.right ]);
+          yScale = d3
+            .scalePoint()
+            .range([height - margin.bottom, margin.top + 50]);}
         xScale.domain([25, 85]);
 
         yScale.domain(countries);
@@ -675,7 +700,7 @@ d3.csv("data/mep-data.csv")
               if (countries.length > 0) {
           countriesCircles
             .transition()
-            .duration(1500)
+            .duration(1000)
             .attr("fill",function (d, index) {
                 
               if(agePerCountry[d.country].minAge==d.age){
