@@ -27,17 +27,7 @@ chartState.scale = Scales.lin;
 chartState.legend = Legend.total;
 
 // Colors used for circles depending on continent
-let colors = d3
-  .scaleOrdinal()
-  .domain([
-    "asia",
-    "africa",
-    "northAmerica",
-    "europe",
-    "southAmerica",
-    "oceania",
-  ])
-  .range(["#D81B60", "#1976D2", "#388E3C", "#BCBCBC", "#E64A19", "#455A64"]);
+
 
 let parties = d3
   .scaleOrdinal()
@@ -53,12 +43,7 @@ let parties = d3
     "#154288",
   ]);
 
-d3.select("#asiaColor").style("color", colors("asia"));
-d3.select("#africaColor").style("color", colors("africa"));
-d3.select("#northAmericaColor").style("color", colors("northAmerica"));
-d3.select("#southAmericaColor").style("color", colors("southAmerica"));
-d3.select("#europeColor").style("color", colors("europe"));
-d3.select("#oceaniaColor").style("color", colors("oceania"));
+
 
 let svg = d3
   .select("#svganchor")
