@@ -65,11 +65,7 @@
        max-height: 1100px;
       }
 
-      /* #checkboxes > * {
-            font-size: 14px;
-            display: inline;
-            padding-top: 3px;
-        } */
+    
 
      
       .title h2{
@@ -84,9 +80,7 @@
       .bootst {
         display: none;
       }
-      /* .stateButtons {
-        width: 80%;
-      } */
+     
       .btn-check:checked+.btn-outline-primary{
         background-color: #004494;
         box-shadow: rgba(0, 0, 0, 0) 0px 10px 20px, rgba(0, 0, 0, 0) 0px 6px 6px;
@@ -158,7 +152,6 @@
         font-family: 'Material Icons Outlined';
         content: "done";
         display: block;
-        /* width: 0.5em; */
         height: 1em;
         right:10px;
         border-style: none;
@@ -176,13 +169,11 @@
       }
 
       .scale-group {
-        /* padding-left: 40px; */
         display: inline;
       }
 
 
       button {
-        /* margin:0 auto; */
         display: block;
       }
 
@@ -210,22 +201,8 @@
         background-color: #fffcf8;
         pointer-events: none;
         cursor: none;
-        
-
        
-        /* .name {
-          height: 30px;
-        }
-        .elected {
-          height: 30px;
-        }
-        .party {
-          height: 30px;
-        }
-        .age {
-          height: 30px;
-        } */
-        .container {
+       .container {
           padding: 10px;
         }
       }
@@ -243,15 +220,7 @@
       .container{
         max-width: 1920px;
       }
-      /* @media screen and (max-width: 1200px) {
-        .annotation-group {
-          display: none;
-          
-        }
-        .annotation-line{
-          display: none;
-        }
-      } */
+     
 
       hr{
         margin: 2px;
@@ -262,14 +231,7 @@
         width: 30%;
         
       }
-      /* .left-header{
-        height: 80px;
-       
-
-      } */
-
-      
-      
+           
       .axis path,
       .axis line {
         fill: none;
@@ -390,13 +352,13 @@
         display: list-item;
         list-style-image: url('./data/Ellipse\ 2046.png');
         margin-left:10px;
-        /* padding-bottom: 20px; */
+        
       }
       .blue-bullet{
         display: list-item;
         list-style-image: url('./data/Ellipse\ 2055.png');        
         margin-left:40px;
-        /* padding-bottom: 20px; */
+        
       }
       .mid-line{
         display: list-item;
@@ -433,22 +395,4 @@
       }
       }
 
-      /* .legend {
-            fill: rgba(0,0,0,.87);
-        }
-
-        .article {
-            position: fixed;
-            top: 20px;
-            left: 15px;
-            font-size: 35px;
-            color: rgb(96,125,139);
-        }
-
-        .article-tt {
-            font-size: 14px;
-            background: rgb(96,125,139);
-            border: 1px solid rgb(96,125,139);
-            border-radius: 2px;
-            pointer-events: none;
-        } */
+      
